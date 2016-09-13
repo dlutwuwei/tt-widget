@@ -1,0 +1,22 @@
+extends common.jade
+block title
+    title #{projectName}
+block CSS
+    if isDebug
+        link(rel="stylesheet", type="text/css", href="css/#{projectName}.css")
+    else
+        link(rel="stylesheet", type="text/css", href="css/#{projectName}.css", inline)
+block JS
+    if isDebug
+        script(src="//s0.ipstatp.com/js/lib/jsBridge_160811.js")
+        script(src="//s0.ipstatp.com/js/lib/client.base_160804.js")
+        script(src="//s0.ipstatp.com/js/lib/zepto.js")
+        script(src="//s0.ipstatp.com/js/lib/template.js")
+        script(src="js/#{projectName}.js")
+        script(src="js/#{projectName}.debug.js")
+    else
+        script(src="js/#{projectName}.js", inline)
+block widget
+    div.container
+    script#tpl(type="text/html").
+        <h1>{{title}}</h1>

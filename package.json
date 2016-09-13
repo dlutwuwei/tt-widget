@@ -1,0 +1,20 @@
+{
+  "name": "tt-widget",
+  "version": "1.0.8",
+  "main": "main.js",
+  "bin": {
+    "widget": "./main.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "dlutwuwei",
+  "license": "ISC",
+  "dependencies": {
+    "fs-extra": "^0.30.0",
+    "minimist": "^1.2.0",
+    "mkdirp": "^0.5.1"
+  },
+  "devDependencies": {},
+  "description": ""
+}
