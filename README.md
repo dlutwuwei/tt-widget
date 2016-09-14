@@ -14,7 +14,7 @@ The project has deployed eslint and commit-validate, all commit will be check by
 
 ### commitizen
 
-For unifying commit message, we use prefer [commitizen](https://www.npmjs.com/package/commitizen) to write commit message.
+For unifying commit message, we prefer [commitizen](https://www.npmjs.com/package/commitizen) to write commit message.
 
 install:
 > npm install -g commitizen
@@ -30,22 +30,19 @@ use it:
 
 ### message validate and githook
 
-> npm install ghooks --save-dev
+> npm install bytedance-i18n-ghooks --save-dev
 
-after install ghooks, the hooks of gerrit will be overwrite, we should revert it:
-
-> npm run fixhook
-
-otherwise the changeid will lost, and we can not push commit to remote.
+after install ghooks, the hooks of gerrit will be backuped, but it can run with ghooks also.
 
 ghooks let us run some scripts in different phase of git commit, in package.json, we can see all the config:
+
 ```json
 {
     ....
     "config": {
         "ghooks": {
             "pre-commit": "npm run lint",
-            ##"commit-msg": "npm run lint:msg"## no use
+            "commit-msg": "npm run lint:msg"
         },
         "validate-commit-msg": {
             "types": [
@@ -68,5 +65,6 @@ ghooks let us run some scripts in different phase of git commit, in package.json
     }
 }
 ```
+
 pre-commit we can run lint to check js,and when commit we can check message style.
 

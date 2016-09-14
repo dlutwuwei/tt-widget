@@ -1,6 +1,6 @@
 {
   "name": "tt-widget",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "main": "main.js",
   "bin": {
     "widget": "./main.js"

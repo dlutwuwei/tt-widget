@@ -28,7 +28,7 @@ gulp.task('proc', ['jade-proc', 'js', 'sass', 'imgs'], function() {
             'rootpath': 'dist',
             'compress': false
         }))
-        .pipe(htmlInlineAutoprefixer({ 'browsers': ['ios 7', 'Android 4.3'] }))
+        .pipe(htmlInlineAutoprefixer({ 'browsers': ['ios 7', 'Android >= 4'] }))
         .pipe(htmlInline({ minifyCss: true, minifyJs: false }))
         .pipe(gulp.dest('dist/release'))
         .pipe(connect.reload());
