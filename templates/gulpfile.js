@@ -98,12 +98,47 @@ gulp.task('sass', ['imgs'], function() {
 gulp.task('dev', ['jade', 'html', 'imgs'], function() {
     gulp.watch(['scss/*.scss', 'scss/**/*.scss'], ['html']);
     gulp.watch(['js/*.js', 'js/**/*.js'], ['html']);
-    gulp.watch(['imgs/*'], ['imgs', 'sass']);
+    gulp.watch(['imgs/*'], ['imgs']);
     gulp.watch(['jade/*'], ['jade', 'html']);
     gulp.watch(['html/*.html', 'tpl/*.tpl', 'data/*'], ['html']);
     connect.server({
         root: ['dist'],
         port: 8001,
-        livereload: true
+        livereload: true,
+        middleware: function(connect, connectApp) {
+            return [static('dist/public'), swigRender()]
+        }
     });
 });
+
+function swigRender(options) {
+
+    return function swigRender(req, res, next) {
+        var _path = req.url;
+        var root = options.root || 'dist';
+        var filePath = path.join(root, path.basename(_path));
+        var dataPath = options.dataPath || path.join('json', path.basename(_path).split('.')[0]);
+        try {
+            if(fs.lstatSync(filePath).isDirectory()) {
+                next();
+                return;
+            }
+            var readstream = fs.createReadStream(filePath);
+            readstream.pipe(through2(function (chunk, enc, callback){
+                var file = '', data = {};
+                try{
+                    data = require(path.resolve(dataPath));
+                } catch(e) {
+                    console.log('data path or data file wrong');
+                }
+                var content = new Buffer(chunk).toString();
+                file = swig.render(content, { 'locals': data });
+                this.push(file);
+                callback();
+            })).pipe(res);
+        } catch(e) {
+            console.log(e)
+        }
+        next();
+    }
+}

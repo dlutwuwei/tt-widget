@@ -13,7 +13,7 @@ if (!projectName) {
 }
 var targetName = config.local || config.l ? '.' : projectName;
 var modulesPath = path.dirname(require.resolve('.'));
-var fileNames = ['common.jade', 'config.scss', 'ui.reset.scss', 'index.jade', 'index.scss', 'index.js', 'index.debug.js', 'data.imgs'];
+var fileNames = ['common.jade', 'config.scss', 'ui.reset.scss', 'index.jade', 'index.scss', 'index.json', 'index.js', 'index.debug.js', 'data.imgs'];
 var projectFiles = ['gulpfile.js', 'package.json', '.eslintrc', '.eslintignore'];
 
 fs.stat(path.join(process.cwd(), targetName), function (err, stats) {
