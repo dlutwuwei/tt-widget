@@ -1,6 +1,7 @@
 var fileinclude = require('gulp-include-inline'),
     gulp = require('gulp'),
     swig = require('swig'),
+    fs = require('fs'),
     connect = require('gulp-connect'),
     htmlInlineAutoprefixer = require("gulp-inline-autoprefixer"),
     autoprefixer = require('gulp-autoprefixer'),
@@ -10,7 +11,9 @@ var fileinclude = require('gulp-include-inline'),
     jade = require('gulp-jade'),
     imagemin = require('gulp-imagemin'),
     inlinesource = require('gulp-inline-source'),
-    path = require('path');
+    path = require('path'),
+    static = require('serve-static'),
+    through2 = require('through2');
 
 var pkg = require('./package.json');
 /**
@@ -48,7 +51,7 @@ gulp.task('html', ['jade', 'js', 'sass'], function() {
  * jade task从jade生成html覆盖顶层目录下的同名html文件，千万分清jade和html的项目
  */
 gulp.task('jade', ['js', 'sass'], function() {
-    return gulp.src('./jade/' + pkg.name + '.jade')
+    return gulp.src('./jade/*.jade')
         .pipe(jade({
             locals: {
                 isDebug: true,
@@ -79,7 +82,7 @@ gulp.task('imgs', function() {
 
 gulp.task('js', function() {
     return gulp.src(['js/*.js', 'js/**/*.js'])
-        .pipe(gulp.dest('dist/js'))
+        .pipe(gulp.dest('dist/public/js'))
         .pipe(connect.reload());
 });
 
@@ -91,7 +94,7 @@ gulp.task('sass', ['imgs'], function() {
             maxWeightResource: 10000,
             extensionsAllowed: ['.gif', '.png', '.jpg']
         }))
-        .pipe(gulp.dest('dist/css/'))
+        .pipe(gulp.dest('dist/public/css'))
         .pipe(connect.reload());
 });
 
@@ -112,11 +115,11 @@ gulp.task('dev', ['jade', 'html', 'imgs'], function() {
 });
 
 function swigRender(options) {
-
+    options = options || {};
     return function swigRender(req, res, next) {
         var _path = req.url;
         var root = options.root || 'dist';
-        var filePath = path.join(root, path.basename(_path));
+        var filePath = path.join(root, path.dirname(_path), path.basename(_path));
         var dataPath = options.dataPath || path.join('json', path.basename(_path).split('.')[0]);
         try {
             if(fs.lstatSync(filePath).isDirectory()) {

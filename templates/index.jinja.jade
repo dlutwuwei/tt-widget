@@ -7,16 +7,22 @@ block CSS
     else
         link(rel="stylesheet", type="text/css", href="public/css/#{projectName}.css", inline)
 block JS
+    script(src="//s0.ipstatp.com/js/lib/jsBridge_160811.js")
+    script(src="//s0.ipstatp.com/js/lib/client.base_160804.js")
+    script(src="//s0.ipstatp.com/js/lib/zepto.js")
+    script(src="//s0.ipstatp.com/js/lib/template.js")
     if isDebug
-        script(src="//s0.ipstatp.com/js/lib/jsBridge_160811.js")
-        script(src="//s0.ipstatp.com/js/lib/client.base_160804.js")
-        script(src="//s0.ipstatp.com/js/lib/zepto.js")
-        script(src="//s0.ipstatp.com/js/lib/template.js")
         script(src="public/js/#{projectName}.js")
         script(src="public/js/#{projectName}.debug.js")
     else
         script(src="public/js/#{projectName}.js", inline)
 block widget
     div.container
-    script#tpl(type="text/html").
-        <h1>{{title}}</h1>
+    h1 {{title}}
+    {% if true %}
+    h2 {{title}}
+    div {{title}}
+        {% for index in [1, 2]%}
+        h3 {{index}}.{{title}}
+        {% endfor %}
+    {% endif %}

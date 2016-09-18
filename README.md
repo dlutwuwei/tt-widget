@@ -7,6 +7,7 @@ Create project directory and file for widget project
 ## options
     -f, --force: force to cover exist directory
     -l, --local: update file in current directory path
+    -j, --jinja: use jinja template
 
 ## About commit and eslint
 

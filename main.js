@@ -7,13 +7,15 @@ var mkdirp = require('mkdirp'),
 
 var config = minimist(process.argv.slice(2));
 var projectName = config._[0] || path.basename(process.cwd());
+var jinja = config.jinja || config.j;
 if (!projectName) {
     console.log('No project name!');
     return;
 }
 var targetName = config.local || config.l ? '.' : projectName;
 var modulesPath = path.dirname(require.resolve('.'));
-var fileNames = ['common.jade', 'config.scss', 'ui.reset.scss', 'index.jade', 'index.scss', 'index.json', 'index.js', 'index.debug.js', 'data.imgs'];
+var fileNames = ['common.jade', 'config.scss', 'ui.reset.scss', jinja ? 'index.jinja.jade' : 'index.jade', 'index.scss',
+ 'index.json', jinja ? 'index.jinja.js' : 'index.js', 'index.debug.js', 'data.imgs'];
 var projectFiles = ['gulpfile.js', 'package.json', '.eslintrc', '.eslintignore'];
 
 fs.stat(path.join(process.cwd(), targetName), function (err, stats) {
@@ -35,7 +37,7 @@ fs.stat(path.join(process.cwd(), targetName), function (err, stats) {
 function copyFiles() {
     fileNames.forEach(function (item) {
         var targetDir = item.split('.').pop(),
-            targetFile = item.replace('index', projectName);
+            targetFile = item.replace(/index.(jinja.)?/, projectName + '.');
         copyTo(path.join(modulesPath, 'templates', item), path.join(process.cwd(), targetName, targetDir, targetFile));
     });
     projectFiles.forEach(function (item) {
