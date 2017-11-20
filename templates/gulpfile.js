@@ -1,6 +1,6 @@
 var fileinclude = require('gulp-include-inline'),
     gulp = require('gulp'),
-    swig = require('swig'),
+    nunjucks = require('nunjucks'),
     fs = require('fs'),
     connect = require('gulp-connect'),
     htmlInlineAutoprefixer = require("gulp-inline-autoprefixer"),
@@ -16,6 +16,7 @@ var fileinclude = require('gulp-include-inline'),
     through2 = require('through2');
 
 var pkg = require('./package.json');
+
 /**
  * 发布线上发布模板，并通过gulp-route-dest写到python项目中，widget和jinja均可。
  * 模板中脚本插入使用file-include或者inline-source。
@@ -25,6 +26,7 @@ var empty = function(content) {
     return content;
 };
 
+// 生成jinja2模板
 gulp.task('proc', ['jade-proc', 'js', 'sass', 'imgs'], function() {
     return gulp.src(['dist/jade_result/*.html']) //顺序不能换，后面的同名文件会覆盖前面的,jade生成文件优先
         .pipe(inlinesource({
@@ -37,8 +39,25 @@ gulp.task('proc', ['jade-proc', 'js', 'sass', 'imgs'], function() {
         .pipe(connect.reload());
 });
 
+// 本地预览
+gulp.task('dev', ['jade', 'html', 'imgs'], function() {
+    gulp.watch(['scss/*.scss', 'scss/**/*.scss'], ['html']);
+    gulp.watch(['js/*.js', 'js/**/*.js'], ['html']);
+    gulp.watch(['imgs/*'], ['imgs']);
+    gulp.watch(['jade/*'], ['jade', 'html']);
+    gulp.watch(['html/*.html', 'tpl/*.tpl', 'data/*'], ['html']);
+    connect.server({
+        root: ['dist'],
+        port: 8001,
+        livereload: true,
+        middleware: function(connect, connectApp) {
+            return [static('dist/public'), swigRender()]
+        }
+    });
+});
+
 /**
- * 生成html文件本地调试,可本地测试jinja模板，使用swig模板（nodejs上实现的类django模板）
+ * 生成html文件本地调试,可本地测试jinja2模板，使用nunjucks模板（nodejs上实现的类jinja2模板）
  */
 gulp.task('html', ['jade', 'js', 'sass'], function() {
     return gulp.src(['dist/jade_result/' + pkg.name + '.html'])
@@ -98,50 +117,36 @@ gulp.task('sass', ['imgs'], function() {
         .pipe(connect.reload());
 });
 
-gulp.task('dev', ['jade', 'html', 'imgs'], function() {
-    gulp.watch(['scss/*.scss', 'scss/**/*.scss'], ['html']);
-    gulp.watch(['js/*.js', 'js/**/*.js'], ['html']);
-    gulp.watch(['imgs/*'], ['imgs']);
-    gulp.watch(['jade/*'], ['jade', 'html']);
-    gulp.watch(['html/*.html', 'tpl/*.tpl', 'data/*'], ['html']);
-    connect.server({
-        root: ['dist'],
-        port: 8001,
-        livereload: true,
-        middleware: function(connect, connectApp) {
-            return [static('dist/public'), swigRender()]
-        }
-    });
-});
-
 function swigRender(options) {
     options = options || {};
     return function swigRender(req, res, next) {
         var _path = req.url;
         var root = options.root || 'dist';
         var filePath = path.join(root, path.dirname(_path), path.basename(_path));
-        var dataPath = options.dataPath || path.join('json', path.basename(_path).split('.')[0]);
+        var dataPath = options.dataPath || path.join('json', path.basename(_path).split('.')[0] + '.json');
         try {
-            if(fs.lstatSync(filePath).isDirectory()) {
+            if (fs.lstatSync(filePath).isDirectory()) {
                 next();
                 return;
             }
             var readstream = fs.createReadStream(filePath);
-            readstream.pipe(through2(function (chunk, enc, callback){
-                var file = '', data = {};
-                try{
+            readstream.pipe(through2(function (chunk, enc, callback) {
+                var file = '', content = '', data = {};
+                try {
                     data = require(path.resolve(dataPath));
-                } catch(e) {
-                    console.log('data path or data file wrong');
+                    content = new Buffer(chunk).toString();
+                    file = nunjucks.renderString(content, data);
+                } catch (e) {
+                    file = content;
+                    console.log(e);
                 }
-                var content = new Buffer(chunk).toString();
-                file = swig.render(content, { 'locals': data });
                 this.push(file);
                 callback();
             })).pipe(res);
-        } catch(e) {
+        } catch (e) {
             console.log(e)
         }
         next();
     }
 }
+
